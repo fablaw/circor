@@ -1,0 +1,13 @@
+raw_data/
+.env
+
+.pytest_cache
+__pycache__
+*checkpoint.ipynb
+*.ipynb_checkpoints
+
+.DS_Store
+__MACOSX
+
+*.zip
+*.csv
