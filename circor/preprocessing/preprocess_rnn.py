@@ -14,13 +14,14 @@ def get_max_length():
 
     audio_length = list()
 
-    for file in glob.glob('../raw_data/training_data/*.wav')[:2]:
+    for file in glob.glob('raw_data/training_data/*.wav'):
         sig, srate = librosa.load(file, sr = None)
         audio_length.append(sig.shape[0])
 
     max_length = max(audio_length)
 
     return max_length
+
 
 def wav_to_1D_padded(wave_path, wanted_length= 90000, save=False,sr = None):
 
@@ -38,13 +39,14 @@ def wav_to_1D_padded(wave_path, wanted_length= 90000, save=False,sr = None):
 
     if save:
 
-        timestamp = time.strftime('%d_%H_%M') #record day, hours and minute of savings
+        timestamp = time.strftime('%d_%H_%M') #records day, hours and minute of push
         np.save(wave_path, sig)
-        blob_path = wave_path.split('/')[-1].split('.')[0] #define name of processed_file
+        blob_path = wave_path.split('/')[-1].split('.')[0] #define name of processed wave file eg: '2530'
 
         storage_client = storage.Client(project=PROJECT)
         bucket = storage_client.get_bucket(BUCKET_NAME)
 
+        #locate file in dedicated folder named after timestamp
         blob = bucket.blob(f"processed_data_1D/{timestamp}/{blob_path}.npy")
         blob.upload_from_filename(wave_path)
         os.remove(wave_path)

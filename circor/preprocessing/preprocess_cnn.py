@@ -8,7 +8,7 @@ import time
 
 #Transform audio-recordings in 2D array for CNN input
 
-def wav_to_2D_HD(wave_path,hop_length=1024, save=False, *kwargs):
+def wav_to_2D_HD(wave_path,hop_length=1024, save=False):
     '''Input = .wav file format ie. and audio recording
         Returns a np array RGBA'''
 
@@ -20,7 +20,7 @@ def wav_to_2D_HD(wave_path,hop_length=1024, save=False, *kwargs):
     rgbas= spectrogram.to_rgba(spectrogram.get_array().reshape(scaled_spectrogram.shape))
 
     if save:
-        timestamp = time.strftime('%d_%H')
+        timestamp = time.strftime('%d_%H') #records time of the run
         np.save(wave_path, rgbas)
         blob_path = wave_path.split('/')[-1].split('.')[0]
         """Uploads a file to the bucket."""
@@ -36,7 +36,6 @@ def wav_to_2D_HD(wave_path,hop_length=1024, save=False, *kwargs):
 
 
 def wav_to_2D_compressed(wave_path,hop_length=1024, save=False):
-
 
     wav_audio, fs=librosa.load(wave_path, sr=None)
     scaled_spectrogram = librosa.amplitude_to_db(np.abs(librosa.stft(wav_audio, hop_length=hop_length)), ref=np.max)
