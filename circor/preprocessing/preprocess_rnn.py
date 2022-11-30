@@ -23,7 +23,7 @@ def get_max_length():
     return max_length
 
 
-def wav_to_1D_padded(wave_path, wanted_length= 90000, save=False,sr = None):
+def wav_to_1D_padded(wave_path, wanted_length= 90000, save=False,sr = None, timestamp = time.strftime('%d_%H_%M') ):
 
     '''
     Converting a wav file to a padded ndarray and optional saving.
@@ -37,9 +37,9 @@ def wav_to_1D_padded(wave_path, wanted_length= 90000, save=False,sr = None):
     # add padding
     sig = np.pad(sig,pad_width = (0, wanted_length - sig.shape[0]), mode = 'constant', constant_values = -10)
 
+
     if save:
 
-        timestamp = time.strftime('%d_%H_%M') #records day, hours and minute of push
         np.save(wave_path, sig)
         blob_path = wave_path.split('/')[-1].split('.')[0] #define name of processed wave file eg: '2530'
 
