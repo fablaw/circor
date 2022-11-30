@@ -20,3 +20,5 @@ uvicorn
 
 wfdb
 librosa
+librosa.display
+time
