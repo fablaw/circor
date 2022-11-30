@@ -20,4 +20,3 @@ uvicorn
 
 wfdb
 librosa
-time
