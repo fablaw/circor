@@ -15,6 +15,13 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
+
+@app.get('/show')
+def audio_to_spectro():
+    spectrogram = 'anna'
+    return { 'lulu' : spectrogram}
+
+
 @app.get('/predict')
 def predict():
     # yet to to code, remaining question : are we going with a recording or an image directly?
