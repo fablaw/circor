@@ -20,13 +20,14 @@ def wav_to_2D_HD(wave_path,hop_length=1024, save=False, timestamp = time.strftim
     rgbas= spectrogram.to_rgba(spectrogram.get_array().reshape(scaled_spectrogram.shape))
 
     if save:
-        np.save(wave_path, rgbas)
+        new_path = f"{'/'.join(wave_path.split('.')[0].split('/')[:-1])}/test_numpy/{wave_path.split('.')[0].split('/')[-1]}.npy"
+        np.save(new_path, rgbas)
         blob_path = wave_path.split('/')[-1].split('.')[0]
         """Uploads a file to the bucket."""
         storage_client = storage.Client(project=PROJECT)
         bucket = storage_client.get_bucket(BUCKET_NAME)
         blob = bucket.blob(f"processed_data_2D/{timestamp}_{blob_path}.npy")
-        blob.upload_from_filename(wave_path)
+        blob.upload_from_filename(new_path)
         os.remove(wave_path)
 
     return rgbas
@@ -45,13 +46,14 @@ def wav_to_2D_compressed(wave_path,hop_length=1024, save=False, timestamp = time
     rgbas = rgbas.astype('uint8')
 
     if save:
-        np.save(wave_path, rgbas)
+        new_path = f"{'/'.join(wave_path.split('.')[0].split('/')[:-1])}/test_numpy/{wave_path.split('.')[0].split('/')[-1]}.npy"
+        np.save(new_path, rgbas)
         blob_path = wave_path.split('/')[-1].split('.')[0]
         """Uploads a file to the bucket."""
         storage_client = storage.Client(project=PROJECT)
         bucket = storage_client.get_bucket(BUCKET_NAME)
         blob = bucket.blob(f"processed_data_2D/{timestamp}/{blob_path}.npy")
-        blob.upload_from_filename(wave_path)
+        blob.upload_from_filename(new_path)
         os.remove(wave_path)
 
     return rgbas
