@@ -20,3 +20,6 @@ uvicorn
 
 wfdb
 librosa
+
+mlflow
+prefect
