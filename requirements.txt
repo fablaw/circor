@@ -23,3 +23,7 @@ librosa
 
 mlflow
 prefect
+
+
+streamlit
+requests
