@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from circor.interface.main import wav_to_2D
+import librosa
 
 
 app = FastAPI()

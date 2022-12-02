@@ -1,25 +1,32 @@
 import streamlit as st
 import requests
 
-# One heart
+st.sidebar.title('Welcome on Cardio bot!🩺 \n  ')
+st.sidebar.subheader('Your autonomous heartbeat checkup')
 
-phonocardiogram = st.file_uploader('Share your phonocardiogram with us')
+st.sidebar.write('Dear Patient,')
+st.sidebar.write("On this online platform \
+                you will be able to run preliminary health checks \
+                before going to your cardiologist.")
+st.sidebar.markdown('---')
+st.sidebar.title('How is it working ?')
+st.sidebar.write(" 1) Cardio bot will first convert your heart recording into a spectogram. \
+                This way, you will be able to see a visual representation of your heartbeat")
+st.sidebar.write(" 2) In a second step, Cardio bot will \
+                detect if your heart has a murmur or not")
+phonocardiogram = st.sidebar.file_uploader(label="Upload your phonocardiogram below :",
+                                           type=[".wav", ".wave", ".flac", ".mp3", ".ogg"],)
 
-with st.form(key='Get my fare!'):
-    submit_button = st.form_submit_button(label='Get my fare price')
+with st.sidebar.form(key='How is my heart looking ?'):
+    submit_button = st.form_submit_button(label='How is my heart looking 💓? ')
 
 if submit_button:
-    url = 'https://taxifare.lewagon.ai/predict'
+    url = 'https://circordck-pz3kchuqsq-ew.a.run.app/show'
 
-    if url == 'https://taxifare.lewagon.ai/predict':
+    if url == 'https://circordck-pz3kchuqsq-ew.a.run.app/show':
 
-        parameters = {'audios': f'{ride_date} {ride_time}',
-                'pickup_longitude' : pickup_longitude,
-                'pickup_latitude' : pickup_latitude,
-                'dropoff_longitude' : dropoff_longitude,
-                'dropoff_latitude' : dropoff_latitude,
-                'passenger_count' : passenger_count}
+        parameters = {}
 
         response = requests.get(url,params = parameters, timeout=10).json()
 
-        st.markdown(f'you ride will cost: {response} $ ')
+        st.image(f'you ride will cost: {response} $ ')
