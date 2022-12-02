@@ -35,12 +35,13 @@ def wav_to_1D_padded(wave_path, wanted_length= 90000, save=False,sr = None, time
     # wav to np.array
     sig, srate = librosa.load(wave_path, sr = sr)
     # add padding
-    sig = np.pad(sig,pad_width = (0, wanted_length - sig.shape[0]), mode = 'constant', constant_values = -10)
+    if wanted_length > sig.shape[0]:
+        sig = np.pad(sig,pad_width = (0, wanted_length - sig.shape[0]), mode = 'constant', constant_values = -10)
 
 
     if save:
-
-        np.save(wave_path, sig)
+        new_path = f"{'/'.join(wave_path.split('.')[0].split('/')[:-1])}/test_numpy/{wave_path.split('.')[0].split('/')[-1]}.npy"
+        np.save(new_path, sig)
         blob_path = wave_path.split('/')[-1].split('.')[0] #define name of processed wave file eg: '2530'
 
         storage_client = storage.Client(project=PROJECT)
@@ -48,7 +49,7 @@ def wav_to_1D_padded(wave_path, wanted_length= 90000, save=False,sr = None, time
 
         #locate file in dedicated folder named after timestamp
         blob = bucket.blob(f"processed_data_1D/{timestamp}/{blob_path}.npy")
-        blob.upload_from_filename(wave_path)
+        blob.upload_from_filename(new_path)
         os.remove(wave_path)
 
 

@@ -29,7 +29,10 @@ def wav_to_1D():
     timestamp = time.strftime('%d_%H_%M')
 
     for wave_path in glob.glob('raw_data/training_data/*.wav'):
-        output = wav_to_1D_padded(wave_path, save=True, wanted_length=max_length, timestamp=timestamp)
+        output = wav_to_1D_padded(wave_path,
+                                  save=True,
+                                  wanted_length=max_length,
+                                  timestamp=timestamp)
 
     return
 
