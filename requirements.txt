@@ -24,5 +24,6 @@ librosa
 mlflow
 prefect
 
-pywt
-sympy
+
+streamlit
+requests
