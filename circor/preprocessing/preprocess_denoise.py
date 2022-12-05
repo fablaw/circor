@@ -13,8 +13,8 @@ from sympy import Symbol, solve, nsolve, log, N, evalf #Installation: pip instal
 from google.cloud import storage
 from circor.parameters.params import BUCKET_NAME, PROJECT
 #from tensorflow.keras.preprocessing.sequence import pad_sequences
-import soundfile as sf #Pip install soundfile ??
-
+import soundfile as sf #Installation: pip install soundfile
+#from preprocess_rnn import wav_to_1D_padded, get_max_length
 
 
 
@@ -139,10 +139,13 @@ def download_reconstruct_upload(df: pd.DataFrame, index: int, array_length: int,
                                 sig_len: int = 6_000, sig_start:int=0,
                                 sr:int = 4000, num_cycles: int=5) -> np.ndarray:
     """Download the raw npy file from the cloud and returns it with the selected array length """
+    #!!!!!May need to fix missing arguments in functions!!!!!
+
     X = df
     patient_id  = X.iloc[index]["Patient ID"]
     rec_loc = X.iloc[index]["Recording_location"]
 
+    #Google bucket info
     storage_client = storage.Client(project=PROJECT)
     bucket = storage_client.get_bucket(BUCKET_NAME)
 
@@ -151,22 +154,31 @@ def download_reconstruct_upload(df: pd.DataFrame, index: int, array_length: int,
     if not os.path.exists(f'../raw_data/training_data_gcloud/{timestamp}'):
         os.makedirs(f'../raw_data/training_data_gcloud/{timestamp}')
 
-    blob_npy = bucket.blob(f"../training_data/{patient_id}_{rec_loc}.npy")
-    blob_tsv = bucket.blob(f"../tsv_raw/{patient_id}_{rec_loc}.tsv")
+   # blob_wav = bucket.blob(f"le-fab88-bucket/audio_raw/{patient_id}_{rec_loc}.wav")
+    blob_npy = bucket.blob(f"le-fab88-bucket/raw_1D/{patient_id}_{rec_loc}.npy")
+    blob_tsv = bucket.blob(f"le-fab88-bucket/tsv_raw/{patient_id}_{rec_loc}.tsv")
 
-    file_path_npy = os.path.join('../raw_data/training_data_gcloud/',f"{patient_id}_{rec_loc}.npy")
-    file_path_tsv = os.path.join('../raw_data/training_data_gcloud/',f"{patient_id}_{rec_loc}.tsv")
 
+ #   file_path_wav = os.path.join('../raw_data/training_data_gcloud/wav_files/',f"{patient_id}_{rec_loc}.wav")
+    file_path_npy = os.path.join('../raw_data/training_data_gcloud/npy_files/',f"{patient_id}_{rec_loc}.npy")
+    file_path_tsv = os.path.join('../raw_data/training_data_gcloud/tsv_files/',f"{patient_id}_{rec_loc}.tsv")
+
+
+ #   blob_wav.download_to_filename(file_path_wav)
     blob_npy.download_to_filename(file_path_npy)
-    blob_npy.download_to_filename(file_path_tsv)
+    blob_tsv.download_to_filename(file_path_tsv)
 
 
+  #  sig= librosa.load(file_path_wav, sr = sr)[0]
 
+    #Saving locally
     sig = np.load(file_path_npy)
+    np.save(file_path_npy, sig)
+  #  sig = np.load(file_path_npy)
     tsv_df = pd.read_csv(file_path_tsv, sep='\t', header = None)
 
     #Treat and reconstruct the signal
-    sig = reconstruct_signal(sig=sig, tsv_df=tsv_df, wavelet=wavelet, level=level, mode=mode, sigma=sigma, sig_len = sig_len, sig_start=sig_start,
+    sig_reconst = reconstruct_signal(sig=sig, tsv_df=tsv_df, wavelet=wavelet, level=level, mode=mode, sigma=sigma, sig_len = sig_len, sig_start=sig_start,
                              sr = sr, num_cycles=num_cycles)
 
     if not os.path.exists(f'../processed_data/npy_files_{timestamp}'):
@@ -176,30 +188,61 @@ def download_reconstruct_upload(df: pd.DataFrame, index: int, array_length: int,
 
 
     #Defining local file paths
-    file_path_npy_processed = os.path.join('../processed_data/npy_files_{timestamp}/',f"{patient_id}_{rec_loc}.npy")
-    file_path_wav_processed = os.path.join('../processed_data/wav_files_{timestamp}/',f"{patient_id}_{rec_loc}.wav")
+    file_path_npy_processed = os.path.join('../processed_data/npy_files{timestamp}/',f"{patient_id}_{rec_loc}.npy")
+    file_path_wav_processed = os.path.join('../processed_data/wav_files{timestamp}/',f"{patient_id}_{rec_loc}.wav")
+  #  file_path_new_wav_processed = os.path.join('../processed_data/wav_files_{timestamp}/',f"new.wav")
 
     #Save files locally
-    np.save(file_path_npy_processed)
-    sf.write(file=file_path_wav_processed, data=sig, samplerate=4000, subtype='PCM_24')
+    np.save(file_path_npy_processed, sig_reconst)
+    sf.write(file=file_path_wav_processed, data=sig_reconst, samplerate=4000, subtype='PCM_24')
+ #   sf.write(file=file_path_new_wav_processed, data=sig_reconst, samplerate=4000, subtype='PCM_24')
 
-    blob_path_npy =  file_path_npy_processed.split('/')[-1].split('.')[0] #define name of processed npy file
-    blob_path_wav =  file_path_wav_processed.split('/')[-1].split('.')[0] #define name of processed wav file
+    # blob_path_npy =  file_path_npy_processed.split('/')[-1].split('.')[0] #define name of processed npy file
+    # blob_path_wav =  file_path_wav_processed.split('/')[-1].split('.')[0] #define name of processed wav file
+
 
     #locate file in dedicated folder named after timestamp
-    blob_npy_processed = bucket.blob(f"../processed_data/npy_files/{timestamp}/{patient_id}_{rec_loc}.npy")
-    blob_wav_processed = bucket.blob(f"../processed_data/wav_files/{timestamp}/{patient_id}_{rec_loc}.wav")
+    blob_npy_processed = bucket.blob(f"le-fab88-bucket/processed_data/processed_npy/{timestamp}/{patient_id}_{rec_loc}.npy")
+    blob_wav_processed = bucket.blob(f"le-fab88-bucket/processed_data/processed_wav/{timestamp}/{patient_id}_{rec_loc}.wav")
+ #   blob_new_wav_processed = bucket.blob(f"le-fab88-bucket/processed_data/wav_files/{timestamp}/new.wav")
 
     #Upload to bucket
     blob_npy_processed.upload_from_filename(file_path_npy_processed)
     blob_wav_processed.upload_from_filename(file_path_wav_processed)
+  #  blob_new_wav_processed.upload_from_filename(file_path_new_wav_processed)
 
 
-    #Google bucket info
-    storage_client = storage.Client(project=PROJECT)
-    bucket = storage_client.get_bucket(BUCKET_NAME)
 
-    #May need to fix missing arguments in functions
-    os.remove(file_path_npy)
-    os.remove(file_path_tsv)
+    # os.remove(file_path_npy)
+    # os.remove(file_path_tsv)
+    return sig
+
+
+def wav_to_1D(wave_path, wanted_length= 6000, save=False,sr = None, timestamp = time.strftime('%d_%H_%M') ):
+
+
+    """
+    Converting a wav file to an unpadded ndarray and optional saving.
+    """
+
+    # wav to np.array
+    sig, srate = librosa.load(wave_path, sr = sr)
+
+
+
+    if save:
+        new_path = f"{'/'.join(wave_path.split('.')[0].split('/')[:-1])}/test_numpy/{wave_path.split('.')[0].split('/')[-1]}.npy"
+        np.save(new_path, sig)
+        blob_path = wave_path.split('/')[-1].split('.')[0] #define name of processed wave file eg: '2530'
+
+        storage_client = storage.Client(project=PROJECT)
+        bucket = storage_client.get_bucket(BUCKET_NAME)
+
+        #locate file in dedicated folder named after timestamp
+        blob = bucket.blob(f"processed_data_1D/{timestamp}/{blob_path}.npy")
+        blob.upload_from_filename(new_path)
+        os.remove(wave_path)
+
+
+
     return sig
