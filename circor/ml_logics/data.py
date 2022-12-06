@@ -2,33 +2,22 @@ import numpy as np
 import librosa
 import librosa.display
 import pandas as pd
-import os
-from circor.preprocessing.preprocessing_csv import select_patients
-from google.cloud import storage
 import glob
+import os
 
+#local
+csv_path=os.getcwd()+'/processed_data/df_new.csv'
+df_new=pd.read_csv(csv_path)
 
-project=os.environ.get("PROJECT")
-bucket_name=os.environ.get("BUCKET_NAME")
-storage_client = storage.Client(project=project)
-bucket = storage_client.get_bucket(bucket_name)
+#from very beginning
+#df=pd.read_csv(download_to_local()[1])
 
-def rgba_data(save=False):
+def rgba_data(save=True):
     """turning .wave data to rgba of size(224, 224, 3)"""
-    df_new=select_patients()
-
-    blob = bucket.blob(f"audio_treated_02_12_2022")
-
-    if not os.path.exists(f'../processed_data'):
-        os.makedirs(f'../processed_data')
-
-    local_storage='../processed_data'
-    blob.download_from_filename(local_storage)
 
     X_raw=[]
-    for i in df_new.index:
-        file='../processed_data/audio_treated_02_12_2022/'+str(df_new.loc[i, 'Patient ID'])+'_'+df_new.loc[i,'Recording_location']+'.wav'
-        x, sr=librosa.load(file)
+    for wave_path in glob.glob(f'/Users/fabianlaw/code/fablaw/circor/processed_data/wav_files/*.wav'):
+        x, sr=librosa.load(wave_path)
 
         D = librosa.stft(x[0:50000], n_fft=446, hop_length=224)
         S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
@@ -39,29 +28,26 @@ def rgba_data(save=False):
 
         rgba=rgbas[:,:,0:3]
 
-        X.raw.append(rgba)
+        if save:
+            new_path = f"{'/'.join(wave_path.split('.')[0].split('/')[:-1])}/X_raw/{wave_path.split('.')[0].split('/')[-1]}.npy"
+            np.save(new_path, rgbas)
 
-        if save==True:
-            output='/processed_data/'+str(df_new.loc[i, 'Patient ID'])+'_'+df_new.loc[i,'Recording_location']+'.npy'
-            np.save(output, rgba)
+        X_raw.append(rgba)
 
     X=np.stack(X_raw)
 
-    y=df_new.Outcome
+    y=df_new.outcome.map({'Abnormal': 1, 'Normal': 0})
 
-    return (X, y)
+    return X, y
 
 def rgba_new():
 
-    blob = bucket.blob(f"")
+    patient_recordings_list = (df_new['patient_id'].astype(str) +'_'+df_new['audible']).tolist()
 
-    if not os.path.exists(f'../new'):
-        os.makedirs(f'../new')
+    patient_new=np.random.choice(patient_recordings_list)
+    print(patient_new)
 
-    local_storage="../new"
-    blob.download_from_filename(local_storage)
-
-    file=glob.glob(f'/Users/fabianlaw/code/fablaw/circor/new/*.wav')
+    file=f'/Users/fabianlaw/code/fablaw/circor/processed_data/wav_files/{patient_new}.wav'
     x, sr=librosa.load(file)
 
     D = librosa.stft(x[0:50000], n_fft=446, hop_length=224)
@@ -73,4 +59,6 @@ def rgba_new():
 
     rgba=rgbas[:,:,0:3]
 
-    return rgba.reshape((1,224,224,3))
+    X_new=rgba.reshape((1,224,224,3))
+
+    return X_new

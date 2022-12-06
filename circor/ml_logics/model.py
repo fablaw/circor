@@ -1,7 +1,6 @@
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Dense, Flatten
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.losses import BinaryCrossentropy
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.applications.densenet import DenseNet201
 from tensorflow.keras.metrics import Recall
@@ -9,7 +8,7 @@ import numpy as np
 from typing import Tuple
 
 
-def init_model(X: np.ndarray) -> Model:
+def init_model(X: np.ndarray):
     base_model = DenseNet201(include_top=False, input_shape=X.shape[1:])
 
     base_model.trainable = False
@@ -31,29 +30,29 @@ def init_model(X: np.ndarray) -> Model:
     print("\n✅ model initialized")
     return model
 
-def compile_model(model: Model, learning_rate=0.0001) -> Model:
+def compile_model(model, learning_rate=0.0001):
     """
     Compile the Neural Network
     """
     adam_opt = Adam(learning_rate=learning_rate)
-    model.compile(loss=BinaryCrossentropy(),
+    model.compile(loss='binary_crossentropy',
                   optimizer=adam_opt,
                   metrics=['accuracy',Recall()])
 
     print("\n✅ model compiled")
     return model
 
-def train_model(model: Model,
+def train_model(model,
                 X: np.ndarray,
                 y: np.ndarray,
                 batch_size=32,
                 patience=10,
                 validation_split=0.2,
-                validation_data=None) -> Tuple[Model, dict]:
+                validation_data=None):
     """
     Fit model and return a the tuple (fitted_model, history)
     """
-    es = EarlyStopping(monitor="val_recall",
+    es = EarlyStopping(monitor="val_accuracy",
                        patience=patience,
                        restore_best_weights=True,
                        verbose=0)
@@ -62,7 +61,7 @@ def train_model(model: Model,
                         y,
                         validation_split=validation_split,
                         validation_data=validation_data,
-                        epochs=50,
+                        epochs=30,
                         batch_size=batch_size,
                         callbacks=[es],
                         verbose=0)
@@ -71,10 +70,10 @@ def train_model(model: Model,
 
     return model, history
 
-def evaluate_model(model: Model,
+def evaluate_model(model,
                    X: np.ndarray,
                    y: np.ndarray,
-                   batch_size=32) -> Tuple[Model, dict]:
+                   batch_size=32):
     """
     Evaluate trained model performance on dataset
     """

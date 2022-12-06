@@ -1,14 +1,9 @@
 
-import numpy as np
-import librosa
-import librosa.display
 import time
-from google.cloud import storage
-from parameters.params import BUCKET_NAME, PROJECT
-import os
-from preprocessing.wav_to_1D import download_bucket_objects, wav_to_raw1D
+from circor.parameters.params import BUCKET_NAME
+from circor.preprocessing.wav_to_1D import download_bucket_objects, wav_to_raw1D
 import glob
-from preprocessing.preprocessing_csv import select_patients
+from circor.preprocessing.preprocessing_csv import select_patients
 
 def wav_to_1D():
 

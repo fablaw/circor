@@ -1,5 +1,11 @@
 import numpy as np
 import pandas as pd
+import os
+from google.cloud import storage
+import subprocess
+
+project=os.environ.get("PROJECT")
+bucket_name=os.environ.get("BUCKET_NAME")
 
 
 def drop_duplicates(data: pd.DataFrame) -> pd.DataFrame:
@@ -34,22 +40,41 @@ def select_1_recording(df: pd.DataFrame) -> pd.DataFrame:
 
     return df_new
 
-def select_patients(df: pd.DataFrame) ->pd.DataFrame:
+def select_patients():
 
     """
     Select rows based on returning patients, all or partial locations measured, murmur status. It returns a modified features df and the
     outcome series
     """
-    #to remove rows with unknown murmur
+    #retrieving data from google cloud
+    source_csv = f'gs://{bucket_name}/training_data.csv'
+    local_csv = '../processed_data'
+    command_csv = f'gsutil cp {source_csv} {local_csv} '
+
+    subprocess.run(command_csv, shell=True)
+
+    #reading data saved locally
+    df=pd.read_csv(local_csv+'/training_data.csv')
+
+    #remove rows with unknown murmur
     df_1=df[~df['Murmur'].isin(['Unknown'])]
 
-    #to remove duplicates(appear in both campaigns)
+    #remove duplicates(appear in both campaigns)
     df_2=drop_duplicates(df_1)
 
     #selecting only subjects with all recordings at 4 different locations
     df_3=df_2[df_2['Recording locations:']=='AV+PV+TV+MV']
 
-    #select most audible location if available, else assign random choice
+    #select most audible location if available, otherwise, assign random choice
     df_4=select_1_recording(df_3)
 
-    return df_4
+    #save to local
+    filepath=local_csv+'/df_new.csv'
+    df_4.to_csv(filepath, index=False, header=True)
+
+    return filepath
+
+if __name__ == '__main__':
+    drop_duplicates
+    select_1_recording
+    select_patients()

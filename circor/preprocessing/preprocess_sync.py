@@ -16,7 +16,6 @@ from circor.preprocessing.main_1D import download_to_local
 
 project=os.environ.get("PROJECT")
 bucket_name=os.environ.get("BUCKET_NAME")
-timestamp = time.strftime('%d_%H_%M')
 
 
 def nb_beta(detail: np.ndarray, L:int, sigma: float, lmbd: float) -> float:
