@@ -20,7 +20,7 @@ app.add_middleware(
 def predict(patient_id: int = 2530) -> dict:
 
 
-    X_pred = preprocess(patient_id)
+    X_pred = select_patients(patient_id)
 
     model = app.state.model
     X_processed = preprocess(X_pred)

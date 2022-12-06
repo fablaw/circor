@@ -1,7 +1,7 @@
 FROM python:3.8.6-buster
 COPY circor /circor
 #COPY model.joblib /model.joblib
-COPY requirements.txt /requirements.txt
+COPY requirements_prod.txt /requirements.txt
 COPY setup.py /setup.py
 RUN apt-get update
 RUN apt-get install libsndfile1-dev -y
