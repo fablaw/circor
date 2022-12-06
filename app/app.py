@@ -17,8 +17,8 @@ st.sidebar.write("On this online platform \
                 you will be able to run preliminary health checks \
                 before going to your cardiologist.")
 st.sidebar.markdown('---')
-st.sidebar.title('How is it working ?')
-st.sidebar.write(" 1) Cardio bot will first convert your heart recording into a spectogram. \
+st.sidebar.title('How does it work ?')
+st.sidebar.write(" 1) Cardio bot will first convert your heart recording into a spectrogram. \
                 This way, you will be able to see a visual representation of your heartbeat")
 st.sidebar.write(" 2) In a second step, Cardio bot will \
                 detect if your heart has a murmur or not")
