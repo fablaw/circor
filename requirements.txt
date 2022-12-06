@@ -28,3 +28,6 @@ prefect
 streamlit
 requests
 
+PyWavelets
+sympy
+soundfile
