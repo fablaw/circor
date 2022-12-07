@@ -4,7 +4,7 @@ from pydub import AudioSegment
 from circor.interface.main import pred
 from circor.ml_logics.registry import load_model
 import os
-from api.audio_decoder import image_from_dict
+from circor.api.audio_decoder import image_from_dict
 
 app = FastAPI()
 
