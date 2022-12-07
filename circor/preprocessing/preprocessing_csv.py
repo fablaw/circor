@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import os
-from google.cloud import storage
 import subprocess
 
 project=os.environ.get("PROJECT")
