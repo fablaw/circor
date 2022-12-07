@@ -78,13 +78,13 @@ if st.session_state.stage > 0:
 
         col1, col2, col3 = st.columns([1,3,3])
 
-        phonocardiogram_clean = open(f'/home/annagatty/code/fablaw/circor/circor/app/processed_wav/{phonocardiogram_raw.name}', 'rb')
+        phonocardiogram_clean = open(f'{os.getcwd()}/circor/app/processed_wav/{phonocardiogram_raw.name}', 'rb')
         audio_bytes = phonocardiogram_clean.read()
         col1.audio(audio_bytes, start_time=0)
 
         #Spectrogram of clean data
         col2.markdown("Spectrogram of your heartbeat without noise")
-        phonocardiogram_npy_clean = np.load(f'/home/annagatty/code/fablaw/circor/circor/app/processed_npy/{phonocardiogram_raw.name[:-4]}.npy')
+        phonocardiogram_npy_clean = np.load(f'{os.getcwd()}/circor/app/processed_npy/{phonocardiogram_raw.name[:-4]}.npy')
         D = librosa.amplitude_to_db(np.abs(librosa.stft(phonocardiogram_npy_clean)), ref=np.max)
         fig, ax = plt.subplots()
         img = librosa.display.specshow(D, sr=fs,x_axis='time', y_axis='log')
@@ -117,11 +117,6 @@ if st.session_state.stage > 0:
 
                 # Set the headers for the request
                 headers = {"Content-Type": "audio/wav"}
-
-
-                response = request.post(url=url, params=params, headers=headers, data=file)
-                    # Use a Session object to make the request
-            with requests.Session() as session:
 
                 # Make the POST request to the API
                 response = session.post(url, data=data, headers=headers)
