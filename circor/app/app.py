@@ -5,6 +5,8 @@ import librosa
 import librosa.display
 import numpy as np
 import os
+from app.audio_conversion_app import image_to_dict
+
 
 #use the full page
 st.set_page_config(layout="wide")
@@ -100,10 +102,18 @@ if st.session_state.stage > 0:
         plt.ylim(bottom=-0.5, top=0.5)
         col3.pyplot(fig_2)
 
+        npy_for_api = image_to_dict(phonocardiogram_npy_clean)
+
+
+
+
+
     st.button('Should i go see the cardiologist ?', on_click=set_stage, args=(3,))
     st.markdown("___")
     st.write(phonocardiogram_clean)
     if st.session_state.stage > 2:
+
+
 
         # Set the URL of the API endpoint
         url ='https://circordck-pz3kchuqsq-ew.a.run.app/predict'
