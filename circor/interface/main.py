@@ -1,5 +1,6 @@
 
 from circor.preprocessing.preprocess_sync import download_reconstruct_upload
+from circor.preprocessing.main_1D import download_to_local
 from circor.ml_logics.data import rgba_data, rgba_new
 from circor.ml_logics.model import init_model, compile_model, train_model, evaluate_model
 from sklearn.model_selection import train_test_split
@@ -15,7 +16,7 @@ def preprocess():
     ''' applying denoising functions on the original wave form, and output cleaned waveform  '''
     print("\n⭐️ Use case: preprocess")
 
-    #download_to_local()
+    download_to_local()
 
     download_reconstruct_upload()
 
@@ -109,44 +110,37 @@ def evaluate():
 
     return acc
 
-def pred():
+def pred(X_pred=None, model=None):
     """
     Evaluate the performance of the latest production model on new data
     """
 
     print("\n⭐️ Use case: predict")
 
-    from circor.ml_logics.registry import load_model
+    if X_pred==None:
+        X_file=os.getcwd()+'/processed_data/X_test/X_test.npy'
+        X_test=np.load(X_file)
 
-    model=load_model()
+        X_processed=X_test[0,:,:,:]
+        X_goodshape=np.expand_dims(X_processed, axis=0)
+    else:
+        X_goodshape=rgba_new(X_pred)
 
-    X_file=os.getcwd()+'/processed_data/X_test/X_test.npy'
-    X_test=np.load(X_file)
-
-    X_processed=X_test[0:2,:,:,:]
-
-    y_pred=model.predict(X_processed)
+    y_pred=model.predict(X_goodshape)
 
     print("\n✅ prediction done!")
 
-    print("Prediction for 1st heart sound")
     if round(y_pred[0][0],2) >= 0.50:
-        print("There is a high probability that murmurs exist")
+        print("Murmurs exist!")
     else:
-        print("There is a high probability that murmurs do not exist")
-
-    print("Prediction for 2nd heart sound")
-    if round(y_pred[1][0],2) >= 0.50:
-        print("There is a high probability that murmurs exist")
-    else:
-        print("There is a high probability that murmurs do not exist")
+        print("There is a high probability that murmurs do not exist.")
 
     return None
 
 
 if __name__ == '__main__':
 
-    #preprocess()
-    #train()
-    #evaluate()
+    preprocess()
+    train()
+    evaluate()
     pred()
