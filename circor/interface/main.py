@@ -4,7 +4,7 @@ from circor.preprocessing.main_1D import download_to_local
 from circor.ml_logics.data import rgba_data, rgba_new
 from circor.ml_logics.model import init_model, compile_model, train_model, evaluate_model
 from sklearn.model_selection import train_test_split
-from circor.ml_logics.save_load import save_model, load_model, get_model_version
+from circor.ml_logics.registry import save_model, load_model, get_model_version
 import numpy as np
 import time
 import os

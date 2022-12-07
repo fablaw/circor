@@ -119,7 +119,7 @@ def synchronise(npy_array: np.ndarray, tsv_df: pd.DataFrame, sr: int = 4000, num
 
     tsv_df = tsv_df[row_start:row_end]          #Certain files do not have 1 as the second segment;
                                                 #would need to use an if condition; probably already in Fabian's
-    start_index = math.ceil(sr * tsv_df.iloc[0][0])
+    start_index = math.floor(sr * tsv_df.iloc[0][0])
     end_index = math.floor(sr * tsv_df.iloc[-1][1]) + 1
     npy_array_sync = npy_array[start_index:end_index]  #May need to correct the values by +/- 1, but only minor effects
 
