@@ -40,15 +40,9 @@ def rgba_data(save=True):
 
     return X, y
 
-def rgba_new():
+def rgba_new(X_pred):
 
-    patient_recordings_list = (df_new['patient_id'].astype(str) +'_'+df_new['audible']).tolist()
-
-    patient_new=np.random.choice(patient_recordings_list)
-    print(patient_new)
-
-    file=f'/Users/fabianlaw/code/fablaw/circor/processed_data/wav_files/{patient_new}.wav'
-    x, sr=librosa.load(file)
+    x, sr=librosa.load(X_pred)
 
     D = librosa.stft(x[0:50000], n_fft=446, hop_length=224)
     S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
@@ -59,6 +53,6 @@ def rgba_new():
 
     rgba=rgbas[:,:,0:3]
 
-    X_new=rgba.reshape((1,224,224,3))
+    X_new=np.expand_dims(rgba, axis=0)
 
     return X_new
