@@ -33,3 +33,5 @@ requests
 PyWavelets
 sympy
 soundfile
+
+pydub

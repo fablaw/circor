@@ -9,7 +9,7 @@ run_preprocess_1D_and_save:
 	python -c 'from circor.interface.main import wav_to_1D; wav_to_1D()'
 
 streamlit:
-	-@streamlit run app/app.py
+	-@streamlit run circor/app/app.py
 
 run_api:
 	uvicorn circor.api.api:app --reload

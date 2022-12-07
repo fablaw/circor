@@ -78,13 +78,13 @@ if st.session_state.stage > 0:
 
         col1, col2, col3 = st.columns([1,3,3])
 
-        phonocardiogram_clean = open(f'/home/annagatty/code/fablaw/circor/app/processed_wav/{phonocardiogram_raw.name}', 'rb')
+        phonocardiogram_clean = open(f'/home/annagatty/code/fablaw/circor/circor/app/processed_wav/{phonocardiogram_raw.name}', 'rb')
         audio_bytes = phonocardiogram_clean.read()
         col1.audio(audio_bytes, start_time=0)
 
         #Spectrogram of clean data
         col2.markdown("Spectrogram of your heartbeat without noise")
-        phonocardiogram_npy_clean = np.load(f'/home/annagatty/code/fablaw/circor/app/processed_npy/{phonocardiogram_raw.name[:-4]}.npy')
+        phonocardiogram_npy_clean = np.load(f'/home/annagatty/code/fablaw/circor/circor/app/processed_npy/{phonocardiogram_raw.name[:-4]}.npy')
         D = librosa.amplitude_to_db(np.abs(librosa.stft(phonocardiogram_npy_clean)), ref=np.max)
         fig, ax = plt.subplots()
         img = librosa.display.specshow(D, sr=fs,x_axis='time', y_axis='log')
@@ -95,7 +95,33 @@ if st.session_state.stage > 0:
         #Oscillogram of raw data
         col3.markdown("Oscillogram of your heartbeat without noise")
         fig_2, ax = plt.subplots()
-        img_oscillo = plt.plot(phonocardiogram)
+        img_oscillo = plt.plot(phonocardiogram_npy_clean)
         plt.xlim(left= 0,right= 5000)
         plt.ylim(bottom=-0.5, top=0.5)
         col3.pyplot(fig_2)
+
+    st.button('Should i go see the cardiologist ?', on_click=set_stage, args=(3,))
+    st.markdown("___")
+    st.write(phonocardiogram_clean)
+    if st.session_state.stage > 2:
+
+        # Set the URL of the API endpoint
+        url ='https://circordck-pz3kchuqsq-ew.a.run.app/predict'
+
+        with phonocardiogram_clean as file:
+
+            with requests.Session() as request:
+                data = file.read()
+                params= {"uploadType": "media",
+                        "name": phonocardiogram_clean.name}
+
+                # Set the headers for the request
+                headers = {"Content-Type": "audio/wav"}
+
+
+                response = request.post(url=url, params=params, headers=headers, data=file)
+                    # Use a Session object to make the request
+            with requests.Session() as session:
+
+                # Make the POST request to the API
+                response = session.post(url, data=data, headers=headers)
