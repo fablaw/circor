@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydub import AudioSegment
 from circor.interface.main import pred
+from circor.ml_logics.registry import load_model
 
 app = FastAPI()
 
