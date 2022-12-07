@@ -130,12 +130,12 @@ def pred(X_pred=None, model=None):
 
     print("\n✅ prediction done!")
 
-    if round(y_pred[0][0],2) >= 0.50:
-        print("Murmurs exist!")
-    else:
-        print("There is a high probability that murmurs do not exist.")
+    #if round(y_pred[0][0],2) >= 0.50:
+        #print("Murmurs exist!")
+    #else:
+        #print("There is a high probability that murmurs do not exist.")
 
-    return None
+    return y_pred[0][0]
 
 
 if __name__ == '__main__':
