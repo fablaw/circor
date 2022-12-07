@@ -1,91 +1,58 @@
 import numpy as np
-import glob
 import librosa
+import librosa.display
 import pandas as pd
+import glob
+import os
 
-#2D data process
+#local
+csv_path=os.getcwd()+'/processed_data/df_new.csv'
+df_new=pd.read_csv(csv_path)
 
-def gray_padd(file,max_length):
-    """take a 2D_array rgbas file as input and return a gray and padded to max_length file"""
-    file_gray = np.mean(file,axis=2).astype('uint8')
-    if file_gray.shape[1]>max_length:
-        pad = file_gray[:,:max_length]
-    else:
-        pad = np.pad(file_gray,pad_width=((0,0),(0, max_length - file_gray.shape[1])), mode = 'constant', constant_values = -10)
-    return pad
+#from very beginning
+#df=pd.read_csv(download_to_local()[1])
 
-def create_X(clean_data_csv,max_length):
-    if clean_data_csv['Recording locations'=='AT+PV+TV+MV']:
-        X_pre=np.empty([len(clean_data_csv),1025, max_length,4])
-        iteration=0
-        for i in clean_data_csv['Patient ID']:
-            i_all=np.empty([1025, max_length,4])
+def rgba_data(save=True):
+    """turning .wave data to rgba of size(224, 224, 3)"""
 
-            file_1='../content/processed_2D/' + str(i) + '_AV.wav.npy'
-            av = np.load(file_1)
-            av=gray_padd(av,max_length)
-            i_all[:,:,0]=av
+    X_raw=[]
+    for wave_path in glob.glob(f'/Users/fabianlaw/code/fablaw/circor/processed_data/wav_files/*.wav'):
+        x, sr=librosa.load(wave_path)
 
-            file_2='../content/processed_2D/' + str(i) + '_MV.wav.npy'
-            mv = np.load(file_2)
-            mv=gray_padd(mv,max_length)
-            i_all[:,:,1]=mv
+        D = librosa.stft(x[0:50000], n_fft=446, hop_length=224)
+        S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
 
-            file_3='../content/processed_2D/' + str(i) + '_PV.wav.npy'
-            pv = np.load(file_3)
-            pv=gray_padd(pv,max_length)
-            i_all[:,:,2]=pv
+        spectrogram = librosa.display.specshow(S_db, y_axis="log", sr=sr, hop_length=1024, x_axis="time")
 
-            file_4='../content/processed_2D/' + str(i) + '_TV.wav.npy'
-            tv = np.load(file_4)
-            tv=gray_padd(tv,max_length)
-            i_all[:,:,3]=tv
+        rgbas= spectrogram.to_rgba(spectrogram.get_array().reshape(S_db.shape))
 
-            X_pre[iteration,:,:,:]=i_all
-            iteration+=1
-    else:
-        X_pre=np.empty([len(clean_data_csv),1025, max_length])
-        iteration=0
-        for i in clean_data_csv.index:
-            path='../content/processed_2D/' + str(clean_data_csv.Patient_id[i]) + '_' + str(clean_data_csv['Recording locations'][i])+'.wav.npy'
-            file = np.load(path)
-            file=gray_padd(file,max_length)
-            X_pre[iteration,:,:]=file
-            iteration+=1
+        rgba=rgbas[:,:,0:3]
 
-    return X_pre
+        if save:
+            new_path = f"{'/'.join(wave_path.split('.')[0].split('/')[:-1])}/X_raw/{wave_path.split('.')[0].split('/')[-1]}.npy"
+            np.save(new_path, rgbas)
 
+        X_raw.append(rgba)
 
-#1D data process
+    X=np.stack(X_raw)
 
-def process_5_cycles_synchronised():
-    name, start, duration=[],[],[]
-    for f in glob.glob(f'raw_data/training_data/*.tsv'):
-        x=(''.join(f.rsplit('.tsv',1))).split('/')
-        name.append(x[-1])
-        cs=pd.read_csv(f, sep='\t')
-        sta=cs.iloc[0,0]
-        sto=cs.iloc[19,1]
-        dura=sto-sta
-        start.append(sta)
-        duration.append(dura)
+    y=df_new.outcome.map({'Abnormal': 1, 'Normal': 0})
 
-    for index in range(len(name)):
-        file='raw_data/training_data/'+name[index]+'.wav'
-        x_1, fs=librosa.load(file, sr=None, offset=start[index], duration=duration[index])
+    return X, y
 
-        output='/Users/fabianlaw/code/fablaw/circor/raw_data/1.0.3/npy_sync_5_cycles/'+name[index]+'.npy'
-        np.save(output,x_1)
+def rgba_new(X_pred):
 
-def select_1_recording(df_drop_dup):
-    """select one recording: either the one where the murmur is most audible or random one"""
-    ls=[]
-    for ind in df_drop_dup.index:
-        r=df_drop_dup.loc[ind, 'Recording locations:'].split('+')
-        l=np.random.choice(r)
-        ls.append(l)
-    df_new=pd.DataFrame({'Patient_id': df_drop_dup['Patient ID'],
-                     'select': ls,
-                     'audible': df_drop_dup['Most audible location']
-                    })
-    df_new.audible.fillna(df_new.select, inplace=True)
+    x, sr=librosa.load(X_pred)
+
+    D = librosa.stft(x[0:50000], n_fft=446, hop_length=224)
+    S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
+
+    spectrogram = librosa.display.specshow(S_db, y_axis="log", sr=sr, hop_length=1024, x_axis="time")
+
+    rgbas= spectrogram.to_rgba(spectrogram.get_array().reshape(S_db.shape))
+
+    rgba=rgbas[:,:,0:3]
+
+    X_new=np.expand_dims(rgba, axis=0)
+
+    return X_new

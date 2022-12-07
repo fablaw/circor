@@ -1,65 +1,10 @@
 import numpy as np
 import pandas as pd
 import os
-# import librosa
-# import librosa.display
-import glob
-import time
-import math
-# import pywt #Installation: pip install PyWavelets --> For wavelet based reconstructions
-# from sympy import Symbol, solve, nsolve, log, N, evalf #Installation: pip install sympy
-# # --> For higher precision lmbda since librosa.load gives 9 decimal digits (float32); May drop later
-# #import soundfile as sf --> To save the processed the series; for testing and may be demonstrations
-from google.cloud import storage
-from circor.parameters.params import BUCKET_NAME, PROJECT
-#from tensorflow.keras.preprocessing.sequence import pad_sequences
+import subprocess
 
-
-def select_patients(df: pd.DataFrame, drop_dup: bool = True, all_locations: bool = True, murmur:bool = True) ->pd.DataFrame:
-#-> tuple[pd.DataFrame, pd.Series]:
-    """
-    Select rows based on returning patients, all or partial locations measured, murmur status. It returns a modified features df and the
-    outcome series
-    """
-
-    circor = df
-    circor = circor.drop(columns = ['Pregnancy status', 'Age', 'Sex', 'Height', 'Weight',
-       'Pregnancy status',  'Systolic murmur timing',
-       'Systolic murmur shape', 'Systolic murmur grading',
-       'Systolic murmur pitch', 'Systolic murmur quality',
-       'Diastolic murmur timing', 'Diastolic murmur shape',
-       'Diastolic murmur grading', 'Diastolic murmur pitch',
-       'Diastolic murmur quality', 'Campaign'])
-    circor['Outcome'] = circor['Outcome'].map({'Normal': 0, 'Abnormal':1 })
-
-    if drop_dup:
-        circor = drop_duplicates(circor)                #Replace with Fabian's random selection of one row from the repetition
-        circor = circor.drop(columns='Additional ID')
-
-    if murmur:
-        circor=circor[~(circor['Murmur']=='Unknown')]
-
-    if all_locations:
-        circor=circor[circor['Recording locations:']=='AV+PV+TV+MV']
-        X = circor[['Patient ID', 'Recording locations']]
-    else:
-        # patient_series = list()
-        # location_series  = list()
-        # outcome_series = list()
-        # for index in range(circor.shape[0]):
-        #     split_locations = circor.iloc[index]['Recording locations:'].split('+')
-        #     location = np.random.choice(split_locations, size =1, p= None ) #Not yet picking the most audible location; or weights
-        #     patient_series.append(circor.iloc[index]['Patient ID'])
-        #     location_series.append(location)
-        #     outcome_series.append(circor.iloc[index]['Outcome'])
-        # tmp_dict = {'Patient ID': patient_series, 'Recording_location': location_series, 'Outcome':outcome_series}
-        # circor = pd.DataFrame(data=tmp_dict, index=None)
-        circor = select_1_recording(circor)
-     #   X = circor[['Patient ID', 'Recording_location']]
-    #y = circor['Outcome']
-
-  # return X, y
-    return circor
+project=os.environ.get("PROJECT")
+bucket_name=os.environ.get("BUCKET_NAME")
 
 def drop_duplicates(data: pd.DataFrame) -> pd.DataFrame:
     """Drop all patients who have an Additional ID"""
@@ -81,14 +26,54 @@ def select_1_recording(df: pd.DataFrame) -> pd.DataFrame:
         rec=df.loc[ind, 'Recording locations:'].split('+')
         location=np.random.choice(rec)
         random_rec.append(location)
-
+        
     #construct new dataframe out of cleaned dataframe
-    #FIX INDENDATION ERROR!!!!
-    df_new=pd.DataFrame({'Patient ID': df['Patient ID'],
-                        'select': random_rec,
-                        'Most audible location': df['Most audible location'],
-                        'Outcome': df.Outcome
+    df_new=pd.DataFrame({'patient_id': df['Patient ID'],
+                         'select': random_rec,
+                         'audible': df['Most audible location'],
+                         'outcome': df.Outcome
                         })
-    df_new['Most audible location'].fillna(df_new.select, inplace=True)
-    df_new.rename(columns = {'audible: Recording_location'})
+
+    df_new.audible.fillna(df_new.select, inplace=True)
+
     return df_new
+
+def select_patients():
+
+    """
+    Select rows based on returning patients, all or partial locations measured, murmur status. It returns a modified features df and the
+    outcome series
+    """
+    #retrieving data from google cloud
+    source_csv = f'gs://{bucket_name}/training_data.csv'
+    local_csv = '../processed_data'
+    command_csv = f'gsutil cp {source_csv} {local_csv} '
+
+    subprocess.run(command_csv, shell=True)
+
+    #reading data saved locally
+    df=pd.read_csv(local_csv+'/training_data.csv')
+
+    #remove rows with unknown murmur
+    df_1=df[~df['Murmur'].isin(['Unknown'])]
+
+    #remove duplicates(appear in both campaigns)
+    df_2=drop_duplicates(df_1)
+
+    #selecting only subjects with all recordings at 4 different locations
+    df_3=df_2[df_2['Recording locations:']=='AV+PV+TV+MV']
+
+    #select most audible location if available, otherwise, assign random choice
+    df_4=select_1_recording(df_3)
+
+    #save to local
+    filepath=local_csv+'/df_new.csv'
+    df_4.to_csv(filepath, index=False, header=True)
+
+    return filepath
+
+if __name__ == '__main__':
+    drop_duplicates
+    select_1_recording
+    select_patients()
+

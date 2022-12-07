@@ -1,39 +1,58 @@
-from tensorflow.keras import Sequential, layers,optimizers
+from tensorflow.keras import Sequential
+from tensorflow.keras.layers import Dense, Flatten
+from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.applications.densenet import DenseNet201
 from tensorflow.keras.metrics import Recall
 import numpy as np
 from typing import Tuple
 
 
-def init_model():
-    model = Sequential()
-    model.add(layers.Masking(mask_value=-10, input_shape=(1025,150,4)))
-    model.add(layers.Conv1D(16, kernel_size=3, activation='relu'))
-    model.add(layers.Flatten())
-    model.add(layers.Dense(1, activation='sigmoid'))
+def init_model(X: np.ndarray):
+    base_model = DenseNet201(include_top=False, input_shape=X.shape[1:])
+
+    base_model.trainable = False
+
+    layer1=Flatten()
+    layer2=Dense(2048, activation='relu')
+    layer3=Dense(1024, activation='relu')
+    layer4=Dense(512, activation='relu')
+    layer5=Dense(256, activation='relu')
+    layer6=Dense(128, activation='relu')
+    layer7=Dense(64, activation='relu')
+    layer8=Dense(32, activation='relu')
+    layer9=Dense(16, activation='relu')
+    layer10=Dense(8, activation='relu')
+    layer11=Dense(1, activation='sigmoid')
+
+    model = Sequential([base_model, layer1, layer2, layer3, layer4, layer5, layer6, layer7, layer8, layer9, layer10, layer11])
+
     print("\n✅ model initialized")
     return model
 
-def compile_model(model: Model, learning_rate: float) -> Model:
+def compile_model(model, learning_rate=0.0001):
     """
     Compile the Neural Network
     """
-    adam_opt = optimizers.Adam(learning_rate=learning_rate)
-    model.compile(loss='binary_crossentropy',optimizer=adam_opt,metrics=['accuracy',Recall()])
+    adam_opt = Adam(learning_rate=learning_rate)
+    model.compile(loss='binary_crossentropy',
+                  optimizer=adam_opt,
+                  metrics=['accuracy',Recall()])
+
     print("\n✅ model compiled")
     return model
 
-def train_model(model: Model,
+def train_model(model,
                 X: np.ndarray,
                 y: np.ndarray,
                 batch_size=32,
-                patience=5,
+                patience=10,
                 validation_split=0.2,
-                validation_data=None) -> Tuple[Model, dict]:
+                validation_data=None):
     """
     Fit model and return a the tuple (fitted_model, history)
     """
-    es = EarlyStopping(monitor="val_loss",
+    es = EarlyStopping(monitor="val_accuracy",
                        patience=patience,
                        restore_best_weights=True,
                        verbose=0)
@@ -42,7 +61,7 @@ def train_model(model: Model,
                         y,
                         validation_split=validation_split,
                         validation_data=validation_data,
-                        epochs=100,
+                        epochs=30,
                         batch_size=batch_size,
                         callbacks=[es],
                         verbose=0)
@@ -51,10 +70,10 @@ def train_model(model: Model,
 
     return model, history
 
-def evaluate_model(model: Model,
+def evaluate_model(model,
                    X: np.ndarray,
                    y: np.ndarray,
-                   batch_size=64) -> Tuple[Model, dict]:
+                   batch_size=32):
     """
     Evaluate trained model performance on dataset
     """
@@ -72,7 +91,7 @@ def evaluate_model(model: Model,
 
     loss = metrics["loss"]
     accuracy=metrics["accuracy"]
-    recall = metrics["recall_1"]
+    recall = metrics["recall"]
 
     print(f"\n✅ model evaluated: loss {round(loss, 2)}, accuracy {round(accuracy, 2)}, recall {round(recall, 2)}")
 
