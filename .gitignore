@@ -1,9 +1,11 @@
 raw_data/
+processed_data/
 circor/raw_data
 .env
 app/processed_npy
 app/processed_wav
 app/raw_.wav
+
 
 .pytest_cache
 __pycache__
