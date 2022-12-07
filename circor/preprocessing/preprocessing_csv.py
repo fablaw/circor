@@ -1,12 +1,10 @@
 import numpy as np
 import pandas as pd
 import os
-from google.cloud import storage
 import subprocess
 
 project=os.environ.get("PROJECT")
 bucket_name=os.environ.get("BUCKET_NAME")
-
 
 def drop_duplicates(data: pd.DataFrame) -> pd.DataFrame:
     """Drop all patients who have an Additional ID"""
@@ -28,8 +26,8 @@ def select_1_recording(df: pd.DataFrame) -> pd.DataFrame:
         rec=df.loc[ind, 'Recording locations:'].split('+')
         location=np.random.choice(rec)
         random_rec.append(location)
+        
     #construct new dataframe out of cleaned dataframe
-
     df_new=pd.DataFrame({'patient_id': df['Patient ID'],
                          'select': random_rec,
                          'audible': df['Most audible location'],
@@ -78,3 +76,4 @@ if __name__ == '__main__':
     drop_duplicates
     select_1_recording
     select_patients()
+

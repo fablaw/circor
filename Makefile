@@ -10,3 +10,6 @@ run_preprocess_1D_and_save:
 
 streamlit:
 	-@streamlit run app/app.py
+
+run_api:
+	uvicorn circor.api.api:app --reload
