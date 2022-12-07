@@ -1,13 +1,10 @@
-ipdb
-ipykernel
+
 
 numpy
 pandas
 
 scikit-learn
-tensorflow-macos==2.10.0; sys_platform == 'darwin' and 'ARM' in platform_version # Mac M-chips
-tensorflow==2.10.0; sys_platform == 'darwin' and 'ARM' not in platform_version # Mac Intel chips
-tensorflow==2.10.0; sys_platform != 'darwin' # Windows & Ubuntu Intel chips
+tensorflow-macos==2.10.0; sys_platform == 'darwin' and 'ARM' in platform_version
 google-cloud-bigquery<3.0.0
 google-cloud-storage
 pyarrow
@@ -18,12 +15,9 @@ fastapi
 pytz
 uvicorn
 
-wfdb
 librosa
 
 mlflow
-prefect
-
 
 streamlit
 requests
