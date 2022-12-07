@@ -1,0 +1,8 @@
+README.md
+setup.py
+circor/__init__.py
+circor.egg-info/PKG-INFO
+circor.egg-info/SOURCES.txt
+circor.egg-info/dependency_links.txt
+circor.egg-info/requires.txt
+circor.egg-info/top_level.txt
