@@ -6,7 +6,7 @@ import glob
 import os
 
 #local
-csv_path=os.getcwd()+'/processed_data/df_new.csv'
+csv_path='processed_data/df_new.csv'
 df_new=pd.read_csv(csv_path)
 
 #from very beginning
@@ -16,7 +16,7 @@ def rgba_data(save=True):
     """turning .wave data to rgba of size(224, 224, 3)"""
 
     X_raw=[]
-    for wave_path in glob.glob(f'/Users/fabianlaw/code/fablaw/circor/processed_data/wav_files/*.wav'):
+    for wave_path in glob.glob(f'processed_data/wav_files/*.wav'):
         x, sr=librosa.load(wave_path)
 
         D = librosa.stft(x[0:50000], n_fft=446, hop_length=224)

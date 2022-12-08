@@ -15,12 +15,12 @@ app.add_middleware(
 )
 
 
-model_cnn = load_model()
+app.state.model = load_model()
 
 @app.post('/predict/')
 async def predict(file:UploadFile):
     temp=f'./circor/app/processed_wav/{file.filename}'
-    y_pred = pred(X_pred=temp, model=model_cnn)
+    y_pred = pred(X_pred=temp, model=app.state.model)
 
     return {
             "Prediction": y_pred

@@ -1,13 +1,14 @@
-FROM python:3.8.6-buster
-#FROM --platform=linux/amd64 tensorflow/tensorflow:2.10.0
+
+FROM --platform=linux/amd64 tensorflow/tensorflow:2.10.0
 
 COPY circor /circor
-#COPY model.joblib /model.joblib
+COPY processed_data /processed_data
+COPY raw_data /raw_data
 COPY requirements_prod.txt /requirements_prod.txt
-COPY setup.py /setup.py
 
-#RUN apt-get update
-#RUN apt-get install libsndfile1-dev -y
+
+RUN apt-get update
+RUN apt-get install libsndfile1-dev -y
 
 RUN pip install --upgrade pip
 RUN pip install -r requirements_prod.txt
