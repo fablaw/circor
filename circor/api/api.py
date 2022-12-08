@@ -3,7 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from circor.interface.main import pred
 from circor.ml_logics.registry import load_model
 
-
 app = FastAPI()
 
 
