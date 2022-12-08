@@ -5,6 +5,8 @@ from circor.ml_logics.registry import load_model
 
 app = FastAPI()
 
+model_cnn = load_model(save_copy_locally=True)
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -14,8 +16,6 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
-
-model_cnn = load_model()
 
 @app.post('/predict/')
 async def predict(file:UploadFile):
