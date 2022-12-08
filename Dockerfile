@@ -1,5 +1,6 @@
 
 FROM --platform=linux/amd64 tensorflow/tensorflow:2.10.0
+#FROM tensorflow/tensorflow:2.10.0
 
 COPY circor /circor
 COPY processed_data /processed_data

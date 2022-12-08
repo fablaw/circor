@@ -11,10 +11,9 @@ tensorflow==2.10.0; sys_platform != 'darwin' # Windows & Ubuntu Intel chips
 google-cloud-bigquery<3.0.0
 google-cloud-storage
 pyarrow
-pywt
 scipy
 
-
+python-multipart
 python-dotenv
 fastapi
 pytz

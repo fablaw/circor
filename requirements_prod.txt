@@ -8,12 +8,12 @@ google-cloud-bigquery<3.0.0
 google-cloud-storage
 pyarrow
 
-
+mlflow
 python-dotenv
 fastapi
 pytz
 uvicorn
-
+python-multipart
 librosa
 
 streamlit
