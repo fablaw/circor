@@ -128,14 +128,15 @@ def pred(X_pred=None, model=None):
 
     y_pred=model.predict(X_goodshape)
 
+    res=np.round(y_pred[0][0],2)
+
     print("\n✅ prediction done!")
 
-    #if round(y_pred[0][0],2) >= 0.50:
-        #print("Murmurs exist!")
-    #else:
-        #print("There is a high probability that murmurs do not exist.")
+    if res >= 0.50:
+        return f"Murmurs detected!, chance : {np.round(res*100, 4)}%"
+    else:
+        return f"Murmurs not detected, chance : {np.round((1-res)*100,4)}%"
 
-    return y_pred[0][0]
 
 
 if __name__ == '__main__':
