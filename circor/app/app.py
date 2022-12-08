@@ -1,11 +1,9 @@
 import streamlit as st
-import requests
 import matplotlib.pyplot as plt
 import librosa
 import librosa.display
 import numpy as np
 import os
-from circor.app.audio_conversion_app import image_to_dict
 
 
 #use the full page
