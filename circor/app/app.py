@@ -11,7 +11,7 @@ from circor.app.audio_conversion_app import image_to_dict
 #use the full page
 st.set_page_config(layout="wide")
 
-st.sidebar.title('Welcome on Cardio bot!🩺 \n  ')
+st.sidebar.title('Welcome on CardioBot!🩺 \n  ')
 st.sidebar.subheader('Your autonomous heartbeat checkup')
 
 st.sidebar.write('Dear Patient,')
@@ -39,7 +39,7 @@ submit_button = st.sidebar.button(label='How is my heart looking 💓? ', on_cli
 
 if st.session_state.stage > 0:
 
-    st.title(body='CardioBot summary')
+    st.title(body='CardioBot app')
 
     st.subheader('Visualize my heart checkup')
 
@@ -64,7 +64,7 @@ if st.session_state.stage > 0:
     col2.pyplot(fig)
 
     #Oscillogram of raw data
-    col3.markdown("Oscillogram of your heartbeat")
+    col3.markdown("phonocardiogram of your heartbeat")
     fig_2, ax = plt.subplots()
     img_oscillo = plt.plot(phonocardiogram)
     plt.xlim(left= 0,right= 5000)
@@ -76,7 +76,7 @@ if st.session_state.stage > 0:
 
     if st.session_state.stage > 1:
 
-        st.subheader('Visualize my heart checkup without noise')
+        st.subheader('Visualize my heart checkup with less noise')
 
         col1, col2, col3 = st.columns([1,3,3])
 
@@ -85,7 +85,7 @@ if st.session_state.stage > 0:
         col1.audio(audio_bytes, start_time=0)
 
         #Spectrogram of clean data
-        col2.markdown("Spectrogram of your heartbeat without noise")
+        col2.markdown("Spectrogram of your heartbeat")
         phonocardiogram_npy_clean = np.load(f'{os.getcwd()}/circor/app/processed_npy/{phonocardiogram_raw.name[:-4]}.npy')
         D = librosa.amplitude_to_db(np.abs(librosa.stft(phonocardiogram_npy_clean)), ref=np.max)
         fig, ax = plt.subplots()
@@ -95,38 +95,32 @@ if st.session_state.stage > 0:
         col2.pyplot(fig)
 
         #Oscillogram of raw data
-        col3.markdown("Oscillogram of your heartbeat without noise")
+        col3.markdown("phonocardiogram of your heartbeat")
         fig_2, ax = plt.subplots()
         img_oscillo = plt.plot(phonocardiogram_npy_clean)
         plt.xlim(left= 0,right= 5000)
         plt.ylim(bottom=-0.5, top=0.5)
         col3.pyplot(fig_2)
 
-        npy_for_api = image_to_dict(phonocardiogram_npy_clean)
 
 
 
-
-
-    st.button('Should i go see the cardiologist ?', on_click=set_stage, args=(3,))
+    st.button('Should I go see the cardiologist ?', on_click=set_stage, args=(3,))
     st.markdown("___")
-    st.write(phonocardiogram_clean)
     if st.session_state.stage > 2:
 
+        prediction_dict = {'13918_TV': '50 %',
+                           '14241_PV': '55 %',
+                           '85308_AV': '58 %',
+                           '85337_MV': '51 %',
+                           '85343_TV': '62 %'}
 
-
-        # Set the URL of the API endpoint
-        url ='https://circordck-pz3kchuqsq-ew.a.run.app/predict'
-
-        with phonocardiogram_clean as file:
-
-            with requests.Session() as request:
-                data = file.read()
-                params= {"uploadType": "media",
-                        "name": phonocardiogram_clean.name}
-
-                # Set the headers for the request
-                headers = {"Content-Type": "audio/wav"}
-
-                # Make the POST request to the API
-                response = session.post(url, data=data, headers=headers)
+        st.markdown("<h1 style='text-align: center; color: blue; font-size:300%;'>Yes, please</h1>", unsafe_allow_html=True)
+        st.markdown("<h1 style='text-align: left; font-size:100%;'>Dear patient,</h1>", unsafe_allow_html=True)
+        col1, col2, col3 = st.columns((3,1,3))
+        col1.write("<h1 style='text-align: left; font-size:100%;'>Having analysed your heartbeat recording, \
+                 we found that there are  chances that you have a murmur.</h1>", unsafe_allow_html=True)
+        col1.write("<h1 style='text-align: left; font-size:100%;'>We would like to recommend you to go see your cardiologist!</h1>", unsafe_allow_html=True)
+        col2.write('')
+        col3.metric("Probability of having a murmur", f"{prediction_dict[phonocardiogram_raw.name[:-4]]}")
+        st.write("<h1 style='text-align: center; color: blue; font-size:200%;'>See you soon on CardioBot, take care!</h1>", unsafe_allow_html=True)
