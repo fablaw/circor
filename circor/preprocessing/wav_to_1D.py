@@ -43,8 +43,8 @@ def wav_to_raw1D(wave_path, wanted_length= 90000, save=False,sr = None, timestam
 
         #locate file in dedicated folder named after timestamp
         blob = bucket.blob(f"raw_1D/{timestamp}/{blob_path}.npy")
-        blob.upload_from_filename(new_path)
-        os.remove(wave_path)
+        #blob.upload_from_filename(new_path)
+        #os.remove(wave_path)
 
 
 

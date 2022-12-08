@@ -12,7 +12,7 @@ df_new=pd.read_csv(csv_path)
 #from very beginning
 #df=pd.read_csv(download_to_local()[1])
 
-def rgba_data(save=True):
+def rgba_data(save=False):
     """turning .wave data to rgba of size(224, 224, 3)"""
 
     X_raw=[]
