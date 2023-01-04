@@ -3,15 +3,11 @@ import pandas as pd
 import os
 import librosa
 import librosa.display
-import glob
-import time
 import math
 import pywt
 from sympy import Symbol, solve, nsolve, log, N, evalf
-from google.cloud import storage
 import soundfile as sf
 import subprocess
-from circor.preprocessing.main_1D import download_to_local
 
 
 project=os.environ.get("PROJECT")
@@ -132,40 +128,33 @@ def download_reconstruct_upload(wavelet: str='db14', level:int=None, mode:str='a
     #!!!!!May need to fix missing arguments in functions!!!!!
 
     #local
-    df=pd.read_csv('../processed_data/df_new.csv')
-
-    #from very beginning
-    #df=pd.read_csv(download_to_local()[1])
+    df=pd.read_csv(f'circor/processed_data/df_new.csv')
 
     patient_recordings_list = (df['patient_id'].astype(str) +'_'+df['audible']).tolist()
 
     for recordings in patient_recordings_list:
 
         #local
-        file_path_npy = os.getcwd()+f'/circor/raw_data/06_11_04/audio_raw/{recordings}.npy'
-        file_path_tsv = os.getcwd()+f'/circor/raw_data/06_11_04/tsv_raw/{recordings}.tsv'
-
-        #from very beginning
-        #file_path_npy=os.getcwd()+download_to_local()[2]+f'/{recordings}.npy'
-        #file_path_tsv=os.getcwd()+download_to_local()[0]+f'/{recordings}.tsv'
+        file_path_wav = f'circor/raw_data/audio_raw/{recordings}.wav'
+        file_path_tsv = f'circor/raw_data/tsv_raw/{recordings}.tsv'
 
         #Loading locally
-        sig = np.load(file_path_npy)
+        sig, sr = librosa.load(file_path_wav, sr=4000)
         tsv_df = pd.read_csv(file_path_tsv, sep='\t', header = None)
 
         #Treat and reconstruct the signal
         sig_reconst = reconstruct_signal(sig=sig, tsv_df=tsv_df, wavelet=wavelet, level=level, mode=mode, sigma=sigma, sig_len = sig_len, sig_start=sig_start,
                              sr = sr, num_cycles=num_cycles)
 
-        if not os.path.exists(f'../processed_data/npy_files'):
-            os.makedirs(f'../processed_data/npy_files')
-        if not os.path.exists(f'../processed_data/wav_files'):
-            os.makedirs(f'../processed_data/wav_files')
+        if not os.path.exists(f'circor/processed_data/npy_files'):
+            os.makedirs(f'circor/processed_data/npy_files')
+        if not os.path.exists(f'circor/processed_data/wav_files'):
+            os.makedirs(f'circor/processed_data/wav_files')
 
 
         #Defining local file paths
-        file_path_npy_processed = f'../processed_data/npy_files/{recordings}.npy'
-        file_path_wav_processed = f'../processed_data/wav_files/{recordings}.wav'
+        file_path_npy_processed = f'circor/processed_data/npy_files/{recordings}.npy'
+        file_path_wav_processed = f'circor/processed_data/wav_files/{recordings}.wav'
         #file_path_new_wav_processed = os.path.join('../processed_data/wav_files_{timestamp}/',f"new.wav")
 
         #Save files locally
@@ -174,17 +163,17 @@ def download_reconstruct_upload(wavelet: str='db14', level:int=None, mode:str='a
         #sf.write(file=file_path_new_wav_processed, data=sig_reconst, samplerate=4000, subtype='PCM_24')
 
     #upload whole npy_folder after iteration
-    cloud_tsv_folder = f'gs://{bucket_name}/processed_data/processed_npy'
+    '''cloud_tsv_folder = f'gs://{bucket_name}/processed_data/processed_npy'
     source_tsv_folder = f'../processed_data/npy_files/'
     command_tsv_folder = f'gsutil -m cp -r dir {source_tsv_folder} {cloud_tsv_folder} '
 
-    subprocess.run(command_tsv_folder, shell=True)
+    subprocess.run(command_tsv_folder, shell=True)'''
 
     #upload whole wav_folder after iteration
-    cloud_wav_folder = f'gs://{bucket_name}/processed_data/processed_wav'
+    '''cloud_wav_folder = f'gs://{bucket_name}/processed_data/processed_wav'
     source_wav_folder = f'../processed_data/wav_files/'
     command_wav_folder = f'gsutil -m cp -r dir {source_wav_folder} {cloud_wav_folder} '
 
-    subprocess.run(command_wav_folder, shell=True)
+    subprocess.run(command_wav_folder, shell=True)'''
 
-    return source_wav_folder
+    return print("\n✅ Data preprocessed!")

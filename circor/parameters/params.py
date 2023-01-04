@@ -8,4 +8,4 @@ REGION='europe-west1'
 BUCKET_NAME=os.environ.get('BUCKET_NAME')
 BLOB_LOCATION='data'
 
-LOCAL_REGISTRY_PATH = os.path.expanduser(os.environ.get("LOCAL_REGISTRY_PATH"))
+LOCAL_REGISTRY_PATH = f'circor/assets'

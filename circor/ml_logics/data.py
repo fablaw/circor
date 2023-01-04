@@ -6,17 +6,14 @@ import glob
 import os
 
 #local
-csv_path='processed_data/df_new.csv'
+csv_path=f'circor/processed_data/df_new.csv'
 df_new=pd.read_csv(csv_path)
-
-#from very beginning
-#df=pd.read_csv(download_to_local()[1])
 
 def rgba_data(save=True):
     """turning .wave data to rgba of size(224, 224, 3)"""
 
     X_raw=[]
-    for wave_path in glob.glob(f'processed_data/wav_files/*.wav'):
+    for wave_path in glob.glob(f'circor/processed_data/wav_files/*.wav'):
         x, sr=librosa.load(wave_path)
 
         D = librosa.stft(x[0:50000], n_fft=446, hop_length=224)
@@ -29,8 +26,12 @@ def rgba_data(save=True):
         rgba=rgbas[:,:,0:3]
 
         if save:
-            new_path = f"{'/'.join(wave_path.split('.')[0].split('/')[:-1])}/X_raw/{wave_path.split('.')[0].split('/')[-1]}.npy"
-            np.save(new_path, rgbas)
+
+            if not os.path.exists(f'circor/processed_data/X_raw'):
+                os.makedirs(f'circor/processed_data/X_raw')
+
+            new_path = f"{'/'.join(wave_path.split('.')[0].split('/')[:-2])}/X_raw/{wave_path.split('.')[0].split('/')[-1]}.npy"
+            np.save(new_path, rgba)
 
         X_raw.append(rgba)
 
@@ -38,6 +39,7 @@ def rgba_data(save=True):
 
     y=df_new.outcome.map({'Abnormal': 1, 'Normal': 0})
 
+    print(X.shape, y.shape)
     return X, y
 
 def rgba_new(X_pred):

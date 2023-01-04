@@ -26,7 +26,7 @@ def select_1_recording(df: pd.DataFrame) -> pd.DataFrame:
         rec=df.loc[ind, 'Recording locations:'].split('+')
         location=np.random.choice(rec)
         random_rec.append(location)
-        
+
     #construct new dataframe out of cleaned dataframe
     df_new=pd.DataFrame({'patient_id': df['Patient ID'],
                          'select': random_rec,
@@ -46,7 +46,7 @@ def select_patients():
     """
     #retrieving data from google cloud
     source_csv = f'gs://{bucket_name}/training_data.csv'
-    local_csv = '../processed_data'
+    local_csv = f'circor/processed_data'
     command_csv = f'gsutil cp {source_csv} {local_csv} '
 
     subprocess.run(command_csv, shell=True)
@@ -70,10 +70,9 @@ def select_patients():
     filepath=local_csv+'/df_new.csv'
     df_4.to_csv(filepath, index=False, header=True)
 
-    return filepath
+    return print("\n✅ CSV loaded and preprocessed!")
 
 if __name__ == '__main__':
-    drop_duplicates
-    select_1_recording
+    drop_duplicates()
+    select_1_recording()
     select_patients()
-

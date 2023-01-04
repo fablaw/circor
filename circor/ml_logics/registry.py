@@ -17,6 +17,7 @@ def save_model(model: Model = None,
 
     timestamp = time.strftime("%Y%m%d-%H%M%S")
 
+    '''
     if os.environ.get("MODEL_TARGET") == "mlflow":
 
         # retrieve mlflow env params
@@ -48,9 +49,9 @@ def save_model(model: Model = None,
 
         print("\n✅ data saved to mlflow")
 
-        return None
+        return None '''
 
-    print("\nSave model to local disk...")
+    print("\nSave model to assets...")
 
     # save params
     if params is not None:
@@ -81,6 +82,7 @@ def load_model(save_copy_locally=False) -> Model:
     """
     load the latest saved model, return None if no model found
     """
+    '''
     if os.environ.get("MODEL_TARGET") == "mlflow":
         stage = "Production"
 
@@ -110,9 +112,9 @@ def load_model(save_copy_locally=False) -> Model:
             model_path = os.path.join(LOCAL_REGISTRY_PATH, "models", timestamp)
             model.save(model_path)
 
-        return model
+        return model '''
 
-    print("\nLoad model from local disk...")
+    print("\nLoad model from assets...")
 
     # get latest model version
     model_directory = os.path.join(LOCAL_REGISTRY_PATH, "models")
@@ -125,7 +127,7 @@ def load_model(save_copy_locally=False) -> Model:
     print(f"- path: {model_path}")
 
     model = models.load_model(model_path)
-    print("\n✅ model loaded from disk")
+    print("\n✅ model loaded from assets")
 
     return model
 

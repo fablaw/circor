@@ -17,7 +17,6 @@ def preprocess():
     print("\n⭐️ Use case: preprocess")
 
     download_to_local()
-
     download_reconstruct_upload()
 
     return None
@@ -29,10 +28,10 @@ def train():
 
     X_train, X_test, y_train, y_test=train_test_split(X, y, test_size=0.3, random_state=1)
 
-    output_X=os.getcwd()+'/processed_data/X_test/X_test.npy'
+    output_X=f'circor/processed_data/X_test.npy'
     np.save(output_X, X_test)
 
-    output_y=os.getcwd()+'/processed_data/y_test/y_test.npy'
+    output_y=f'circor/circor/processed_data/y_test.npy'
     np.save(output_y, y_test)
 
     print("\n⭐️ Testing set saved")
@@ -80,8 +79,8 @@ def evaluate():
     '''evaluate on testing set'''
     print("\n⭐️ Use case: evaluate")
 
-    X_file=os.getcwd()+'/processed_data/X_test/X_test.npy'
-    y_file=os.getcwd()+'/processed_data/y_test/y_test.npy'
+    X_file=f'circor/processed_data/X_test.npy'
+    y_file=f'circor/processed_data/y_test.npy'
 
     X_test=np.load(X_file)
     y_test=np.load(y_file)
@@ -118,7 +117,7 @@ def pred(X_pred=None, model=None):
     print("\n⭐️ Use case: predict")
 
     if X_pred==None:
-        X_file=os.getcwd()+'/processed_data/X_test/X_test.npy'
+        X_file=f'circor/processed_data/X_test.npy'
         X_test=np.load(X_file)
 
         X_processed=X_test[0,:,:,:]
