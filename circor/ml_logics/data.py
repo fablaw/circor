@@ -6,7 +6,7 @@ def rgba_new(X_pred):
 
     x, sr=librosa.load(X_pred)
 
-    D = librosa.stft(x[0:50000], n_fft=446, hop_length=224)
+    D = librosa.stft(x[0:50000], n_fft=446, hop_length=148)
     S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
 
     spectrogram = librosa.display.specshow(S_db, y_axis="log", sr=sr, hop_length=1024, x_axis="time")

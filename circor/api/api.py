@@ -15,11 +15,11 @@ app.add_middleware(
 )
 
 
-app.state.model = models.load_model(f'./circor/saved_model')
+app.state.model = models.load_model(f'circor/saved_model')
 
-@app.post('/predict')
+@app.post('/predict/')
 async def predict(file:UploadFile):
-    temp=f'./circor/processed_data/wav_files/{file.filename}'
+    temp=f'circor/processed_data/wav_files/{file.filename}'
     y_pred = pred(X_pred=temp, model=app.state.model)
 
     return {
