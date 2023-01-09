@@ -1,7 +1,6 @@
 
 from circor.parameters.params import BUCKET_NAME
 import os
-from circor.preprocessing.preprocessing_csv import select_patients
 import subprocess
 
 def download_bucket_objects(bucket_name, blob_path, local_path):

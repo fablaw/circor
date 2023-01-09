@@ -54,6 +54,7 @@ def train():
 
     # Save model
     model.save('circor/saved_model')
+    print("\n✅ model saved!")
 
     return val_acc
 
@@ -68,6 +69,8 @@ def evaluate():
     y_test=np.load(y_file)
 
     model=models.load_model('circor/saved_model')
+    print("\n✅ model loaded!")
+
     metrics=evaluate_model(model,
                            X_test,
                            y_test
@@ -97,6 +100,8 @@ def pred(X_pred=None):
         X_goodshape=rgba_new(X_pred)
 
     model=models.load_model('circor/saved_model')
+    print("\n✅ model loaded!")
+
     y_pred=model.predict(X_goodshape)
 
     res=np.round(y_pred[0][0],2)
