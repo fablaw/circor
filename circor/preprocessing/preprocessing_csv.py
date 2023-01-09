@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import os
-import subprocess
+from circor.preprocessing.main_1D import download_to_local
 
 project=os.environ.get("PROJECT")
 bucket_name=os.environ.get("BUCKET_NAME")
@@ -45,14 +45,9 @@ def select_patients():
     outcome series
     """
     #retrieving data from google cloud
-    source_csv = f'gs://{bucket_name}/training_data.csv'
-    local_csv = f'circor/processed_data'
-    command_csv = f'gsutil cp {source_csv} {local_csv} '
-
-    subprocess.run(command_csv, shell=True)
 
     #reading data saved locally
-    df=pd.read_csv(local_csv+'/training_data.csv')
+    df=pd.read_csv(download_to_local())
 
     #remove rows with unknown murmur
     df_1=df[~df['Murmur'].isin(['Unknown'])]
@@ -67,10 +62,15 @@ def select_patients():
     df_4=select_1_recording(df_3)
 
     #save to local
-    filepath=local_csv+'/df_new.csv'
+    if not os.path.exists(f'circor/processed_data'):
+        os.makedirs(f'circor/processed_data')
+
+    filepath=f'circor/processed_data/df_new.csv'
     df_4.to_csv(filepath, index=False, header=True)
 
-    return print("\n✅ CSV loaded and preprocessed!")
+    print("\n✅ CSV preprocessed!")
+
+    return df_4
 
 if __name__ == '__main__':
     drop_duplicates()

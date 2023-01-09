@@ -8,6 +8,7 @@ import pywt
 from sympy import Symbol, solve, nsolve, log, N, evalf
 import soundfile as sf
 import subprocess
+from circor.preprocessing.preprocessing_csv import select_patients
 
 
 project=os.environ.get("PROJECT")
@@ -128,15 +129,17 @@ def download_reconstruct_upload(wavelet: str='db14', level:int=None, mode:str='a
     #!!!!!May need to fix missing arguments in functions!!!!!
 
     #local
-    df=pd.read_csv(f'circor/processed_data/df_new.csv')
+    df=select_patients()
 
     patient_recordings_list = (df['patient_id'].astype(str) +'_'+df['audible']).tolist()
+
+    X_raw=[]
 
     for recordings in patient_recordings_list:
 
         #local
-        file_path_wav = f'circor/raw_data/audio_raw/{recordings}.wav'
-        file_path_tsv = f'circor/raw_data/tsv_raw/{recordings}.tsv'
+        file_path_wav = f'raw_data/audio_raw/{recordings}.wav'
+        file_path_tsv = f'raw_data/tsv_raw/{recordings}.tsv'
 
         #Loading locally
         sig, sr = librosa.load(file_path_wav, sr=4000)
@@ -162,6 +165,26 @@ def download_reconstruct_upload(wavelet: str='db14', level:int=None, mode:str='a
         sf.write(file=file_path_wav_processed, data=sig_reconst, samplerate=4000, subtype='PCM_24')
         #sf.write(file=file_path_new_wav_processed, data=sig_reconst, samplerate=4000, subtype='PCM_24')
 
+        #loading wav files to fit size(224,224,3)
+        x, sr=librosa.load(file_path_wav_processed)
+
+        D = librosa.stft(x[0:50000], n_fft=446, hop_length=148)
+        S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
+
+        spectrogram = librosa.display.specshow(S_db, y_axis="log", sr=sr, hop_length=1024, x_axis="time")
+
+        rgbas= spectrogram.to_rgba(spectrogram.get_array().reshape(S_db.shape))
+
+        rgba=rgbas[:,:,0:3]
+
+        X_raw.append(rgba)
+
+    X=np.stack(X_raw)
+
+    y=df.outcome.map({'Abnormal': 1, 'Normal': 0})
+
+    print(X.shape, y.shape)
+
     #upload whole npy_folder after iteration
     '''cloud_tsv_folder = f'gs://{bucket_name}/processed_data/processed_npy'
     source_tsv_folder = f'../processed_data/npy_files/'
@@ -176,4 +199,4 @@ def download_reconstruct_upload(wavelet: str='db14', level:int=None, mode:str='a
 
     subprocess.run(command_wav_folder, shell=True)'''
 
-    return print("\n✅ Data preprocessed!")
+    return X, y

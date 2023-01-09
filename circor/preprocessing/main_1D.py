@@ -2,6 +2,7 @@
 from circor.parameters.params import BUCKET_NAME
 import os
 from circor.preprocessing.preprocessing_csv import select_patients
+import subprocess
 
 def download_bucket_objects(bucket_name, blob_path, local_path):
     # blob path is bucket folder name
@@ -21,26 +22,35 @@ def download_bucket_objects(bucket_name, blob_path, local_path):
     return command
 
 def download_to_local():
-    #local path for tsv file
-    local_tsv=download_bucket_objects(bucket_name=BUCKET_NAME,
-                            blob_path= 'tsv_raw',
-                            local_path = f'circor/raw_data'
-                            )
 
-    tsv_filepath=local_tsv + '/tsv_raw'
+    if not os.path.exists(f'raw_data'):
+        os.makedirs(f'raw_data')
+
+    #download tsv files
+    download_bucket_objects(bucket_name=BUCKET_NAME,
+                            blob_path= 'tsv_raw',
+                            local_path = f'raw_data'
+                            )
 
     print("\n✅ TSV loaded!")
 
-    #local path for csv file
-    csv_filepath=select_patients()
+    #download csv files
+    source_csv = f'gs://{BUCKET_NAME}/training_data_new.csv'
+    local_csv = f'raw_data'
+    command_csv = f'gsutil cp {source_csv} {local_csv} '
 
-    #local path for npy file
-    local_audio=download_bucket_objects(bucket_name=BUCKET_NAME,
+    subprocess.run(command_csv, shell=True)
+
+    csv_filepath = f'raw_data/training_data_new.csv'
+
+    print("\n✅ CSV loaded!")
+
+    #download audio files
+    download_bucket_objects(bucket_name=BUCKET_NAME,
                             blob_path= 'audio_raw',
-                            local_path = f'circor/raw_data'
+                            local_path = f'raw_data'
                             )
-    npy_filepath=local_audio + '/audio_raw'
 
     print("\n✅ Audio loaded!")
 
-    return print("\n✅ Data successfully loaded!")
+    return csv_filepath
