@@ -83,7 +83,7 @@ def evaluate():
 
     return acc
 
-def pred(X_pred=None):
+def pred(X_pred=None, model=None):
     """
     Evaluate the performance of the latest production model on new data
     """

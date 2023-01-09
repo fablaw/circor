@@ -1,7 +1,7 @@
 from fastapi import FastAPI, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from circor.interface.main import pred
-from circor.ml_logics.registry import load_model
+from tensorflow.keras import models
 
 app = FastAPI()
 
@@ -15,11 +15,11 @@ app.add_middleware(
 )
 
 
-app.state.model = load_model()
+app.state.model = models.load_model(f'./circor/saved_model')
 
-@app.post('/predict/')
+@app.post('/predict')
 async def predict(file:UploadFile):
-    temp=f'./circor/app/processed_wav/{file.filename}'
+    temp=f'./circor/processed_data/wav_files/{file.filename}'
     y_pred = pred(X_pred=temp, model=app.state.model)
 
     return {
