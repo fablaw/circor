@@ -2,11 +2,19 @@ reinstall_package:
 	@pip uninstall -y circor || :
 	@pip install -e .
 
-run_preprocess_2D_and_save:
-	python -c 'from circor.interface.main import wav_to_2D; wav_to_2D()'
+run_preprocess:
+	python -c 'from circor.interface.main import preprocess; preprocess()'
 
-run_preprocess_1D_and_save:
-	python -c 'from circor.interface.main import wav_to_1D; wav_to_1D()'
+run_train:
+	python -c 'from circor.interface.main import train; train()'
+
+run_pred:
+	python -c 'from circor.interface.main import pred; pred()'
+
+run_evaluate:
+	python -c 'from circor.interface.main import evaluate; evaluate()'
+
+run_all: run_train run_evaluate run_pred
 
 streamlit:
 	-@streamlit run circor/app/app.py

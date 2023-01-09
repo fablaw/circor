@@ -1,6 +1,6 @@
 raw_data/
-processed_data/
-circor/raw_data
+circor/processed_data
+circor/saved_model
 .env
 app/processed_npy
 app/processed_wav
