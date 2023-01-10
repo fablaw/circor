@@ -2,8 +2,6 @@ FROM --platform=linux/amd64 tensorflow/tensorflow:2.10.0
 #FROM tensorflow/tensorflow:2.10.0
 
 COPY circor /circor
-COPY processed_data /processed_data
-COPY raw_data /raw_data
 COPY requirements_prod.txt /requirements_prod.txt
 
 

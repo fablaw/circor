@@ -17,7 +17,7 @@ run_evaluate:
 run_all: run_train run_evaluate run_pred
 
 streamlit:
-	-@streamlit run circor/app/app.py
+	-@streamlit run app/app.py
 
 run_api:
 	uvicorn circor.api.api:app --reload
